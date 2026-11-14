@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampCalc - Calculadora Anual de Custos de Camping</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ================= HEADER ================= -->
+  <header class="header">
+    <div class="header-container">
+      <div class="brand">
+        <span class="brand-icon">🏕️</span>
+        <div>
+          <h1>CampCalc</h1>
+          <p>Calculadora e Planejamento Anual de Camping</p>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <div class="control-group">
+          <label for="selectAno">Ano</label>
+          <select id="selectAno" class="select-input">
+            <option value="2020">2020</option>
+            <option value="2021">2021</option>
+            <option value="2022">2022</option>
+            <option value="2023">2023</option>
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+            <option value="2026" selected>2026</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
+            <option value="2029">2029</option>
+            <option value="2030">2030</option>
+            <option value="2031">2031</option>
+            <option value="2032">2032</option>
+            <option value="2033">2033</option>
+            <option value="2034">2034</option>
+            <option value="2035">2035</option>
+            <option value="2036">2036</option>
+            <option value="2037">2037</option>
+            <option value="2038">2038</option>
+            <option value="2039">2039</option>
+            <option value="2040">2040</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="selectCamping">Camping</label>
+          <select id="selectCamping" class="select-input"></select>
+        </div>
+
+        <div class="control-group" style="background: transparent; padding: 0;">
+          <button id="btnExportAno" class="btn btn-outline" title="Exportar dados e exceções do ano atual">
+            💾 Exportar Ano
+          </button>
+          <button id="btnImportAnoTrigger" class="btn btn-outline" title="Importar dados do ano">
+            📂 Importar Ano
+          </button>
+        </div>
+
+        <button id="btnOpenCampingModal" class="btn btn-primary" title="Gerenciar perfis de camping">
+          ⚙️ Campings
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="main-content">
+
+    <!-- Resumo dos Custos Anuais -->
+    <section class="dashboard-grid">
+      <!-- Frequência / Presença -->
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-label">Diárias cobradas</span>
+          <span class="stat-icon">📅</span>
+        </div>
+        <div id="statPresencaQtd" class="stat-value">0 dias</div>
+        <div id="statPresencaValor" class="stat-subtext">R$ 0,00 total</div>
+      </div>
+
+      <!-- Energia -->
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-label">Energia Elétrica</span>
+          <span class="stat-icon">⚡</span>
+        </div>
+        <div id="statEnergiaValor" class="stat-value">R$ 0,00 total</div>
+        <div id="statEnergiaQtd" class="stat-subtext">0 dias com cobrança</div>
+        <div id="statEnergiaBaixaDet" class="stat-subtext">Baixa: 0 dias</div>
+        <div id="statEnergiaAltaDet" class="stat-subtext">Alta: 0 dias</div>
+      </div>
+
+      <!-- Melhor Taxa Aplicada (Comparativo Mensalidade vs Trimestre vs Anuidade) -->
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-label">Melhor Taxa (Aplicada)</span>
+          <span class="stat-icon">🏆</span>
+        </div>
+        <div>
+          <div id="taxaWinnerBadge" class="taxa-winner-badge">🏆 Calculando...</div>
+          <div id="statMelhorTaxaValor" class="stat-value">R$ 0,00</div>
+          <div class="stat-subtext">Valor anual integral do plano</div>
+          <div id="statMelhorTaxaMensal" class="stat-subtext">R$ 0,00 por mês</div>
+        </div>
+        <div id="statComparativoPlanos" class="plan-comparison-list"></div>
+      </div>
+
+      <!-- Total Geral Anual -->
+      <div class="stat-card highlight">
+        <div class="stat-header">
+          <span class="stat-label">Total Estimado Anual</span>
+          <span class="stat-icon">💰</span>
+        </div>
+        <div id="statTotalGeral" class="stat-value">R$ 0,00</div>
+        <div id="statTotalGeralMediaMensal" class="stat-subtext">Média mensal: R$ 0,00</div>
+        <div id="statTotalGeralSub" class="stat-subtext">Diárias + Energia + Menor Taxa Fixa</div>
+        <div id="statTotalGeralFooter" class="total-card-footer"></div>
+      </div>
+    </section>
+
+    <!-- Seção do Calendário Anual -->
+    <section>
+      <div class="section-header">
+        <div class="section-title">
+          <span>🗓️</span>
+          <h2>Calendário Dinâmico - <span id="labelAnoAtual">2026</span></h2>
+        </div>
+
+        <div class="calendar-legend">
+          <div class="legend-item">
+            <span class="legend-badge legend-presence"></span>
+            <span>Presença Ativa</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-badge legend-energy-low"></span>
+            <span>Energia Baixa</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-badge legend-energy-high"></span>
+            <span>Energia Alta</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-badge legend-holiday"></span>
+            <span id="labelFeriadoNacional">Feriado Nacional (Brasil)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-badge legend-custom"></span>
+            <span>Data Personalizada</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grade dos 12 meses -->
+      <div id="calendarGrid" class="calendar-grid"></div>
+    </section>
+  </main>
+
+  <!-- ================= MODAL DE CONFIGURAÇÃO DE CAMPINGS ================= -->
+  <div id="modalCamping" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Configurações de Campings</h3>
+        <button id="btnCloseCampingModal" class="btn-close">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Abas com os Campings -->
+        <div class="camping-tabs" id="campingTabsContainer"></div>
+
+        <form id="formCamping" onsubmit="return false;">
+          <div class="form-grid-2">
+            <div class="form-group full-width">
+              <label for="inputCampingNome">Nome do Camping</label>
+              <input type="text" id="inputCampingNome" class="form-control" placeholder="Ex: Camping Bela Vista" required>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="inputCampingEndereco">Endereço completo</label>
+              <textarea id="inputCampingEndereco" class="form-control" rows="2" placeholder="Rua, número, cidade, região e código postal"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="inputCampingTelefone">Telefone com DDI</label>
+              <input type="tel" id="inputCampingTelefone" class="form-control" placeholder="+55 11 12345-6789">
+            </div>
+
+            <div class="form-group">
+              <label for="inputCampingEmail">E-mail</label>
+              <input type="email" id="inputCampingEmail" class="form-control" placeholder="contato@camping.com">
+            </div>
+
+            <div class="form-group">
+              <label for="inputCampingSite">Site</label>
+              <input type="url" id="inputCampingSite" class="form-control" placeholder="https://www.camping.com">
+            </div>
+
+            <div class="form-group">
+              <label for="selectCampingPais">País (define os feriados nacionais)</label>
+              <select id="selectCampingPais" class="form-control">
+                <option value="BR">Brasil</option>
+                <option value="PT">Portugal</option>
+                <option value="ES">Espanha</option>
+                <option value="FR">França</option>
+                <option value="DE">Alemanha</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="inputCampingFrequencia">Frequência / Diária (R$)</label>
+              <input type="number" id="inputCampingFrequencia" class="form-control" step="0.01" min="0" required>
+            </div>
+
+            <div class="form-group">
+              <label for="inputCampingMensalidade">Mensalidade (R$)</label>
+              <input type="number" id="inputCampingMensalidade" class="form-control" step="0.01" min="0" required>
+            </div>
+
+            <div class="form-group">
+              <label for="inputCampingEnergiaBaixa">Energia Baixa (R$/dia)</label>
+              <input type="number" id="inputCampingEnergiaBaixa" class="form-control" step="0.01" min="0" required>
+            </div>
+
+            <div class="form-group">
+              <label for="inputCampingEnergiaAlta">Energia Alta (R$/dia)</label>
+              <input type="number" id="inputCampingEnergiaAlta" class="form-control" step="0.01" min="0" required>
+            </div>
+
+            <div class="form-group">
+              <label for="inputCampingTrimestre">Trimestre (R$)</label>
+              <input type="number" id="inputCampingTrimestre" class="form-control" step="0.01" min="0" required>
+            </div>
+
+            <div class="form-group">
+              <label for="inputCampingAnuidade">Anuidade (R$)</label>
+              <input type="number" id="inputCampingAnuidade" class="form-control" step="0.01" min="0" required>
+            </div>
+          </div>
+
+          <!-- Seleção de Dias da Semana com Cobrança de Presença -->
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label>Dias da semana com cobrança de presença:</label>
+            <div class="chip-grid" id="chipsDiasSemana">
+              <button type="button" class="chip-btn" data-dia="0">Dom</button>
+              <button type="button" class="chip-btn" data-dia="1">Seg</button>
+              <button type="button" class="chip-btn" data-dia="2">Ter</button>
+              <button type="button" class="chip-btn" data-dia="3">Qua</button>
+              <button type="button" class="chip-btn" data-dia="4">Qui</button>
+              <button type="button" class="chip-btn" data-dia="5">Sex</button>
+              <button type="button" class="chip-btn" data-dia="6">Sáb</button>
+            </div>
+          </div>
+
+          <!-- Seleção de Meses de Isenção de Taxas -->
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label>Meses com isenção da diária de ocupação:</label>
+            <div class="chip-grid" id="chipsMesesIsencao">
+              <button type="button" class="chip-btn" data-mes="1">Jan</button>
+              <button type="button" class="chip-btn" data-mes="2">Fev</button>
+              <button type="button" class="chip-btn" data-mes="3">Mar</button>
+              <button type="button" class="chip-btn" data-mes="4">Abr</button>
+              <button type="button" class="chip-btn" data-mes="5">Mai</button>
+              <button type="button" class="chip-btn" data-mes="6">Jun</button>
+              <button type="button" class="chip-btn" data-mes="7">Jul</button>
+              <button type="button" class="chip-btn" data-mes="8">Ago</button>
+              <button type="button" class="chip-btn" data-mes="9">Set</button>
+              <button type="button" class="chip-btn" data-mes="10">Out</button>
+              <button type="button" class="chip-btn" data-mes="11">Nov</button>
+              <button type="button" class="chip-btn" data-mes="12">Dez</button>
+            </div>
+          </div>
+          <p class="form-help">A isenção se aplica somente às diárias de ocupação. Os valores dos planos mensal, trimestral e anual são calculados integralmente.</p>
+
+          <p class="form-help">Os feriados nacionais do calendário são determinados pelo país selecionado acima. Calendários disponíveis: Brasil, Portugal, Espanha, França e Alemanha. Feriados regionais e municipais não são incluídos.</p>
+
+          <!-- Checkbox Perfil Padrão -->
+          <label class="checkbox-label">
+            <input type="checkbox" id="checkCampingDefault">
+            Definir este perfil como o padrão do app (default: true)
+          </label>
+        </form>
+      </div>
+
+      <div class="modal-footer" style="justify-content: space-between;">
+        <div>
+          <button id="btnExportCampings" class="btn btn-outline" type="button">💾 Exportar JSON</button>
+          <button id="btnImportCampingsTrigger" class="btn btn-outline" type="button">📂 Importar JSON</button>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button id="btnDeleteCamping" class="btn btn-danger" type="button">Excluir</button>
+          <button id="btnSaveCamping" class="btn btn-primary" type="button">Salvar Camping</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL DE EDIÇÃO DE DATA PERSONALIZADA ================= -->
+  <div id="modalDia" class="modal-overlay">
+    <div class="modal-content" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3>Personalizar Data</h3>
+        <button id="btnCloseDiaModal" class="btn-close">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="day-modal-info">
+          <div id="diaModalTitulo" class="day-modal-date">01/01/2026</div>
+          <div id="diaModalMeta" class="day-modal-meta">Quinta-feira • Feriado Nacional</div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="checkbox-label" style="margin-top: 0;">
+            <input type="checkbox" id="checkDiaFeriado">
+            <strong>Marcar este dia como feriado</strong>
+          </label>
+          <small class="form-help">Ao alterar, aplica a regra padrão de feriado ou de dia comum; presença e energia ainda podem ser ajustadas abaixo.</small>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="checkbox-label" style="margin-top: 0;">
+            <input type="checkbox" id="checkDiaPresenca">
+            <strong>Cobrar Presença / Frequência neste dia</strong>
+          </label>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label>Nível de Cobrança de Energia:</label>
+          <div class="radio-group-cards">
+            <label class="radio-card" data-val="nenhuma">
+              <input type="radio" name="radioEnergia" value="nenhuma">
+              <div>🚫 Nenhuma</div>
+              <small style="color: var(--text-muted);">R$ 0,00</small>
+            </label>
+            <label class="radio-card" data-val="baixa">
+              <input type="radio" name="radioEnergia" value="baixa">
+              <div>⚡ Baixa</div>
+              <small id="labelPrecoEnergiaBaixa" style="color: var(--text-muted);"></small>
+            </label>
+            <label class="radio-card" data-val="alta">
+              <input type="radio" name="radioEnergia" value="alta">
+              <div>⚡⚡ Alta</div>
+              <small id="labelPrecoEnergiaAlta" style="color: var(--text-muted);"></small>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inputDiaMotivo">Motivo / Observação (Opcional)</label>
+          <input type="text" id="inputDiaMotivo" class="form-control" placeholder="Ex: Réveillon, Emenda de Feriado...">
+        </div>
+      </div>
+
+      <div class="modal-footer" style="justify-content: space-between;">
+        <button id="btnRestaurarDiaPadrao" class="btn btn-outline" type="button">Restaurar Padrão</button>
+        <button id="btnSalvarDia" class="btn btn-primary" type="button">Salvar Data</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inputs invisíveis para upload de arquivos JSON -->
+  <input type="file" id="inputImportCampings" accept=".json" style="display: none;">
+  <input type="file" id="inputImportAno" accept=".json" style="display: none;">
+
+  <!-- Toast de Notificação -->
+  <div id="toast" class="toast">Mensagem</div>
+
+  <!-- Scripts -->
+  <script src="feriados.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
